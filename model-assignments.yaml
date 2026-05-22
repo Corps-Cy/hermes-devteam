@@ -1,16 +1,16 @@
 # Hermes AI 多 Profile 团队配置 — 模型分配方案
 #
-# 策略：根据角色职责特点选择最优模型
-# - GLM-5.1（旗舰）：需要深度推理、复杂分析、高质量生成的角色
-# - GLM-5-Turbo（高速）：需要快速执行、工具调用、任务编排的角色
+# 策略：角色按职责分为两个 Tier，用户根据自己使用的模型自由配置
+# - reasoning（重型）：需要深度推理、复杂分析、高质量生成的角色
+# - execution（轻型）：需要快速执行、工具调用、任务编排的角色
 #
-# 如需自定义，修改下方对应 profile 的 model 字段即可。
+# 安装脚本会读取此文件中的 tier 列表，配合 --model-heavy / --model-fast 参数
+# 为对应 tier 的 profile 分配模型。如果不指定模型参数，则只安装角色定义，
+# 不自动配置模型（由用户自行通过 hermes config 设置）。
 
-models:
-  glm-5-1:
-    name: "GLM-5.1"
-    model_id: "glm-5.1"
-    description: "智谱旗舰模型，综合能力最强"
+tiers:
+  reasoning:
+    description: "需要深度推理、复杂分析、高质量生成的角色"
     profiles:
       - architect    # 技术架构师 — 深度架构设计需要强推理
       - ceo          # 商业 CEO — 商业分析需要高智能
@@ -21,16 +21,34 @@ models:
       - data         # 数据工程师 — 数据分析需要深度计算
       - ml           # AI/ML 工程师 — AI 方案设计需要强推理
 
-  glm-5-turbo:
-    name: "GLM-5-Turbo"
-    model_id: "glm-5-turbo"
-    description: "智谱快速模型，Agent 优化，性价比高"
+  execution:
+    description: "偏重执行、调度、模板化工作，需要快速响应和稳定工具调用"
     profiles:
       - devops       # 运维工程师 — 执行部署指令为主
       - orchestrator  # 项目指挥 — 任务编排和调度为主
       - pmo          # 项目管理 — 流程驱动，模板化工作
 
-# 默认配置（所有 profile 共享）
-defaults:
-  provider: "zai"
-  base_url: "https://open.bigmodel.cn/api/coding/paas/v4"
+# ---- 用户自定义模型（可选，仅作参考示例）----
+# 取消注释并修改为你实际使用的模型，安装脚本会自动读取。
+# 如果不配置此项，安装时可通过 --model-heavy / --model-fast 参数指定。
+#
+# models:
+#   reasoning: "claude-sonnet-4-20250514"
+#   execution: "claude-haiku-4-20250414"
+#
+# 其他常见配置示例：
+#
+# # OpenAI
+# models:
+#   reasoning: "gpt-4o"
+#   execution: "gpt-4o-mini"
+#
+# # 智谱 Z.AI
+# models:
+#   reasoning: "glm-5.1"
+#   execution: "glm-5-turbo"
+#
+# # OpenRouter
+# models:
+#   reasoning: "anthropic/claude-sonnet-4"
+#   execution: "openai/gpt-4o-mini"
