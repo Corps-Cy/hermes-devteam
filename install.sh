@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================================
-# Hermes AI 多 Profile 团队配置 — 一键安装脚本
+# Hermes DevTeam — 一键安装脚本
 # ============================================================================
 # 功能：在全新的 Hermes Agent 安装上，自动创建 11 个专业 Profile
 # 用法：chmod +x install.sh && ./install.sh [选项]
@@ -44,7 +44,7 @@ ALL_PROFILES="$PROFILE_REASONING $PROFILE_EXECUTION"
 
 # ---- 帮助信息 ----
 show_help() {
-    echo -e "${BOLD}Hermes AI 多 Profile 团队配置 — 安装脚本${NC}"
+    echo -e "${BOLD}Hermes DevTeam — 安装脚本${NC}"
     echo ""
     echo "用法: $0 [选项]"
     echo ""
@@ -239,7 +239,7 @@ create_profile() {
 install_profiles() {
     echo ""
     echo -e "${BOLD}${CYAN}═══════════════════════════════════════════════════${NC}"
-    echo -e "${BOLD}${CYAN}        Hermes AI 多 Profile 团队配置 — 安装${NC}"
+    echo -e "${BOLD}${CYAN}        Hermes DevTeam — 安装${NC}"
     echo -e "${BOLD}${CYAN}═══════════════════════════════════════════════════${NC}"
     echo ""
     if [[ -n "$MODEL_HEAVY" ]]; then

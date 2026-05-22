@@ -1,51 +1,30 @@
-# Hermes AI 多 Profile 团队配置
+<p align="center">
+  <h1 align="center">🛠️ Hermes DevTeam</h1>
+  <p align="center">
+    一键为 <a href="https://hermes-agent.nousresearch.com/">Hermes Agent</a> 配置 11 个专业 AI Profile，组建完整的软件工程团队
+  </p>
+  <p align="center">
+    <code>architect</code> · <code>pm</code> · <code>designer</code> · <code>coder</code> · <code>qa</code> · <code>devops</code> · <code>ml</code> · <code>data</code> · <code>ceo</code> · <code>orchestrator</code> · <code>pmo</code>
+  </p>
+</p>
 
-> 一键安装 11 个专业 AI Agent Profile，打造完整的软件研发团队。
-> 支持任意模型 Provider — Claude、GPT、GLM、Gemini、Llama 等。
+---
 
-## 这是什么？
+## 它是什么
 
-本项目为 [Hermes Agent](https://hermes-agent.nousresearch.com/) 提供了一套**预配置的多 Profile 团队设置**。
+Hermes DevTeam 为 [Hermes Agent](https://hermes-agent.nousresearch.com/) 提供了一套**预配置的多 Profile 团队**。每个 Profile 包含独立的角色定义（SOUL.md），模拟真实软件工程团队的分工协作。
 
-通过为不同角色创建独立的 Profile（SOUL.md 角色定义 + 模型分配），你可以在 Hermes AI 中快速切换不同的专家角色，像管理一个真正的软件团队一样使用 AI。
+你可以在不同角色之间快速切换，像管理一个真正的开发团队一样使用 AI：
 
-**核心设计理念：角色定义与模型解耦。** Profile 只定义"这个角色做什么"，不绑定任何特定模型。你可以根据自己的 Provider 和预算自由搭配。
+```
+hermes -p architect     # 切到架构师讨论系统设计
+/switch coder           # 切到全栈工程师开始写代码
+/switch qa              # 切到 QA 做代码审计
+```
 
-## Profile 一览
+**核心原则：角色定义与模型完全解耦。** 你可以用 Claude、GPT、GLM、Gemini、Llama 或任何 Provider — Profile 只定义"这个角色做什么"，模型由你自由搭配。
 
-### Reasoning Tier — 深度推理角色
-
-需要强推理、复杂分析、高质量生成的角色。
-
-| Profile | 角色 | 说明 |
-|---------|------|------|
-| `architect` | 系统架构师 | 系统设计、技术选型、架构评审 |
-| `ceo` | 商业 CEO | 商业决策、战略规划、组织管理 |
-| `coder` | 全栈工程师 | 代码开发、调试、重构 |
-| `designer` | UI/UX 设计师 | 界面设计、用户体验、交互规范 |
-| `pm` | 产品经理 | 需求分析、产品规划、用户故事 |
-| `qa` | QA 审计师 | 质量保障、代码审计、测试策略 |
-| `data` | 数据工程师 | 数据管道、ETL、数据建模 |
-| `ml` | AI/ML 工程师 | 模型训练、MLOps、AI 开发 |
-
-### Execution Tier — 执行调度角色
-
-偏重执行、调度、模板化工作，需要快速响应和稳定工具调用。
-
-| Profile | 角色 | 说明 |
-|---------|------|------|
-| `devops` | 运维工程师 | CI/CD、容器化、基础设施 |
-| `orchestrator` | 项目总指挥 | 任务分发、进度追踪、团队协调 |
-| `pmo` | 项目管理 | 流程管理、模板化、标准化 |
-
-## 为什么分两个 Tier？
-
-不同角色对模型能力的需求不同：
-
-- **Reasoning 角色**需要深度推理、创意生成、长文档理解 — 适合用旗舰模型
-- **Execution 角色**偏重工具调用、任务调度、模板化输出 — 用快速模型即可，性价比更高
-
-这个分法是建议性的，你可以根据实际情况自由调整。
+---
 
 ## 快速开始
 
@@ -57,22 +36,72 @@
 ### 一键安装
 
 ```bash
-git clone https://github.com/yourusername/hermes-profiles.git
-cd hermes-profiles
+git clone https://github.com/Corps-Cy/hermes-devteam.git
+cd hermes-devteam
 chmod +x install.sh
 
-# 方式一：只安装角色定义（不配置模型，推荐先用默认模型试跑）
+# 最简安装 — 只部署角色定义，使用你当前的默认模型
 ./install.sh
 
-# 方式二：安装角色并指定模型
+# 安装角色并指定模型
 ./install.sh --model-heavy claude-sonnet-4 --model-fast gpt-4o-mini
 ```
 
-### 高级选项
+安装完成后即可使用：
 
 ```bash
-# 指定 Provider
-./install.sh --model-heavy glm-5.1 --model-fast glm-5-turbo --provider zai
+hermes -p architect    # 用架构师角色启动
+/switch coder          # 会话中切换角色
+/switch <Tab>          # Tab 补全（需应用补丁）
+```
+
+---
+
+## 团队阵容
+
+### Reasoning Tier — 深度推理
+
+需要强推理、复杂分析、高质量生成的角色，建议配旗舰模型。
+
+| Profile | 角色 | 职责 | SOUL.md |
+|---------|------|------|---------|
+| `architect` | 技术架构师 | 系统设计、技术选型、架构评审、技术文档 | 214 行 |
+| `pm` | 高级产品经理 | 需求分析、PRD、用户故事、优先级排序 | 221 行 |
+| `designer` | 高级 UI/UX 设计师 | 界面设计、交互规范、设计系统、HTML 原型 | 187 行 |
+| `coder` | 顶级全栈工程师 | 代码开发、调试、重构、代码审查 | 144 行 |
+| `qa` | QA 审计工程师 | 代码审计、安全审计、测试策略、质量把关 | 182 行 |
+| `data` | 数据工程师/分析师 | 数据管道、ETL、数据建模、BI 仪表盘 | 255 行 |
+| `ml` | AI/ML 工程师 | LLM 集成、RAG、微调、MLOps、AI 产品 | 246 行 |
+| `ceo` | 商业 CEO | 战略规划、商业决策、ROI 分析、市场洞察 | 131 行 |
+
+### Execution Tier — 执行调度
+
+偏重工具调用、任务编排、模板化工作，用快速模型即可。
+
+| Profile | 角色 | 职责 | SOUL.md |
+|---------|------|------|---------|
+| `devops` | 运维部署工程师 | CI/CD、Docker/K8s、基础设施、监控告警 | 270 行 |
+| `orchestrator` | 项目总指挥 | 任务分解、多 Profile 调度、进度管理 | 321 行 |
+| `pmo` | 项目/版本管理 | 需求跟踪、Sprint 规划、变更日志、发布管理 | 215 行 |
+
+---
+
+## 为什么分 Tier
+
+不同角色对模型能力的需求差异很大：
+
+- **Reasoning 角色**需要深度推理、创意生成、长文档理解 → 适合旗舰模型（Claude Sonnet/Opus、GPT-4o、GLM-5.1 等）
+- **Execution 角色**偏重工具调用、任务编排 → 快速模型就够了（GPT-4o-mini、Claude Haiku、GLM-5-Turbo 等），成本更低
+
+这只是建议分组，你可以完全按自己的判断来分配模型。
+
+---
+
+## 安装选项
+
+```bash
+# 指定模型和 Provider
+./install.sh --model-heavy claude-sonnet-4 --model-fast gpt-4o-mini --provider anthropic
 
 # 使用 OpenRouter 接入不同模型
 ./install.sh \
@@ -80,82 +109,51 @@ chmod +x install.sh
   --model-fast openai/gpt-4o-mini \
   --provider openrouter
 
-# 只装角色定义，不配模型
+# 只装角色定义，跳过模型配置
 ./install.sh --skip-models
 
 # 同时启用 /switch Tab 补全
 ./install.sh --model-heavy claude-sonnet-4 --model-fast gpt-4o-mini --apply-patches
 
-# 预览将要执行的操作
+# 预览操作（不实际执行）
 ./install.sh --dry-run
 ```
 
-### 通过配置文件指定模型
+### 参数说明
 
-你也可以在 `model-assignments.yaml` 中取消 `models:` 段的注释：
+| 参数 | 说明 |
+|------|------|
+| `--model-heavy <model>` | 为 Reasoning Tier 指定模型 |
+| `--model-fast <model>` | 为 Execution Tier 指定模型 |
+| `--provider <name>` | 模型 Provider（如 `anthropic`、`openai`、`openrouter`） |
+| `--base-url <url>` | 自定义 API 端点 |
+| `--apply-patches` | 安装后自动应用 `/switch` 补全补丁 |
+| `--skip-models` | 只安装角色定义，不配置模型 |
+| `--dry-run` | 预览模式，只显示将要执行的操作 |
+
+### 配置文件方式
+
+也可以编辑 `model-assignments.yaml`，取消 `models:` 段的注释并填入你的模型：
 
 ```yaml
 models:
   reasoning: "claude-sonnet-4"
-  execution: "gpt-4o-mini"
+  execution: "claude-haiku-4"
 ```
 
-安装脚本会自动读取。命令行参数 `--model-heavy` / `--model-fast` 优先级更高。
+命令行参数优先级高于配置文件。
 
-## 使用方式
-
-安装完成后，在 Hermes Agent 中使用：
-
-```bash
-# 启动时指定 Profile
-hermes -p architect
-
-# 在会话中切换 Profile
-/switch coder
-/profile designer
-
-# 输入 /switch 后按 Tab 自动补全（需应用补丁）
-/switch <Tab>
-```
-
-## 项目结构
-
-```
-hermes-profiles/
-├── README.md                    # 本文件
-├── LICENSE                      # MIT 许可证
-├── install.sh                   # 一键安装脚本
-├── model-assignments.yaml       # Tier 分层 + 可选模型配置
-├── profiles/                    # 所有 Profile 文件
-│   ├── architect/
-│   │   ├── SOUL.md              # 架构师角色定义
-│   │   └── profile.yaml         # 架构师元数据
-│   ├── ceo/
-│   ├── coder/
-│   ├── data/
-│   ├── designer/
-│   ├── devops/
-│   ├── ml/
-│   ├── orchestrator/
-│   ├── pm/
-│   ├── pmo/
-│   └── qa/
-└── patches/                     # CLI 增强补丁
-    ├── profile-autocomplete.patch  # /switch Tab 补全
-    └── apply-patches.sh            # 补丁应用脚本
-```
+---
 
 ## 自定义
 
 ### 修改角色定义
 
-每个 Profile 的角色行为由 `SOUL.md` 定义。编辑方式：
-
 ```bash
-# 方式一：直接编辑安装后的文件
+# 直接编辑已安装的文件
 vim ~/.hermes/profiles/coder/SOUL.md
 
-# 方式二：在本项目中修改后重新安装
+# 或在本项目中修改后重新安装
 vim profiles/coder/SOUL.md
 ./install.sh
 ```
@@ -163,86 +161,84 @@ vim profiles/coder/SOUL.md
 ### 调整模型分配
 
 ```bash
-# 为所有 reasoning 角色切换模型
+# 为 reasoning tier 全部切换
 for p in architect ceo coder designer pm qa data ml; do
   hermes -p $p config set model.default <your-model>
 done
 
-# 为单个 Profile 切换模型
+# 为单个 Profile 切换
 hermes -p coder config set model.default <model>
 
-# 也可以全部用同一个模型
+# 全部用同一个模型
 for p in architect ceo coder designer devops ml orchestrator pm pmo qa data; do
   hermes -p $p config set model.default gpt-4o
 done
 ```
 
-### 添加新 Profile
+### 添加新角色
 
-1. 在 `profiles/` 下创建新目录
-2. 编写 `SOUL.md`（角色定义）
-3. 编写 `profile.yaml`（元数据）
-4. 更新 `install.sh` 中的 Profile 列表
+1. 在 `profiles/` 下创建新目录（如 `profiles/security/`）
+2. 编写 `SOUL.md` — 角色定义文件
+3. 编写 `profile.yaml` — 元数据（description、description_auto: false）
+4. 更新 `model-assignments.yaml` 将新角色加入对应 tier
 5. 运行 `./install.sh`
 
-### 添加 /switch 自动补全
+---
 
-如果你希望在输入 `/switch` 后按 Tab 自动补全 Profile 名称：
+## /switch 自动补全（可选增强）
+
+安装补丁后，在 Hermes CLI 中输入 `/switch` 按 Tab 即可补全 Profile 名称：
 
 ```bash
 ./patches/apply-patches.sh
 ```
 
-这个补丁会为 Hermes CLI 添加：
+补丁功能：
 - Tab 补全：`/switch <Tab>` 显示所有可用 Profile
 - Ghost Text：输入 `/switch` 后自动显示匹配的 Profile 名
 - 角色标题：补全列表中显示每个 Profile 的角色名称
 - 当前标记：当前激活的 Profile 后显示 `*` 号
 
-## Profile 角色说明
+---
 
-### architect — 系统架构师
-负责系统整体设计、技术选型、架构评审。擅长设计高可用、高性能的系统架构。
+## 项目结构
 
-### ceo — 商业 CEO
-具备全局商业视角，擅长战略规划、商业决策和资源分配。适合产品方向讨论和商业分析。
+```
+hermes-devteam/
+├── README.md                         # 本文件
+├── LICENSE                           # MIT
+├── install.sh                        # 一键安装脚本（支持多种参数）
+├── model-assignments.yaml            # Tier 分层定义 + 可选模型配置
+├── profiles/
+│   ├── architect/  {SOUL.md, profile.yaml}
+│   ├── ceo/         {SOUL.md, profile.yaml}
+│   ├── coder/       {SOUL.md, profile.yaml}
+│   ├── data/        {SOUL.md, profile.yaml}
+│   ├── designer/    {SOUL.md, profile.yaml}
+│   ├── devops/      {SOUL.md, profile.yaml}
+│   ├── ml/          {SOUL.md, profile.yaml}
+│   ├── orchestrator/{SOUL.md, profile.yaml}
+│   ├── pm/          {SOUL.md, profile.yaml}
+│   ├── pmo/         {SOUL.md, profile.yaml}
+│   └── qa/          {SOUL.md, profile.yaml}
+└── patches/
+    ├── profile-autocomplete.patch    # /switch Tab 补全补丁
+    └── apply-patches.sh             # 补丁应用脚本
+```
 
-### coder — 全栈工程师
-熟练掌握多种编程语言和技术栈，擅长代码开发、调试、重构和代码审查。
-
-### data — 数据工程师
-专注于数据管道设计、ETL 流程、数据建模和数据分析。擅长处理大规模数据。
-
-### designer — UI/UX 设计师
-具备设计思维，擅长界面设计、用户体验优化和交互设计。熟悉设计系统和组件库。
-
-### devops — 运维工程师
-擅长 CI/CD 流水线、容器化（Docker/K8s）、基础设施即代码和监控告警。
-
-### ml — AI/ML 工程师
-专注于机器学习模型开发、训练、部署和 MLOps。熟悉主流 ML 框架和工具链。
-
-### orchestrator — 项目总指挥
-负责任务分发、进度追踪和团队协调。擅长将复杂项目分解为可执行的子任务。
-
-### pm — 产品经理
-擅长需求分析、产品规划、用户研究和优先级排序。能够输出清晰的 PRD。
-
-### pmo — 项目管理
-专注于流程管理、标准化和模板化。擅长项目进度管理和风险管控。
-
-### qa — QA 审计师
-擅长质量保障、代码审计、测试策略设计和安全审计。确保交付质量。
+---
 
 ## 许可证
 
-MIT License — 详见 [LICENSE](LICENSE)
+[MIT License](LICENSE)
+
+---
 
 ## 贡献
 
-欢迎提交 Issue 和 PR！
+欢迎 PR 和 Issue：
 
-- 发现角色定义不完善？→ 提交 Issue 或直接修改 SOUL.md
-- 有新的角色想法？→ 创建新 Profile 并提交 PR
-- 模型分配建议？→ 提交 Issue 讨论
-- 支持新的 Provider？→ 提交配置示例
+- 想添加新角色？→ 在 `profiles/` 下创建，提交 PR
+- 角色定义有问题？→ 修改 SOUL.md，提交 PR
+- 有 Provider 配置建议？→ 提交 Issue 讨论
+- 发现 Bug？→ 提交 Issue

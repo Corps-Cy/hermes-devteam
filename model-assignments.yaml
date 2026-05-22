@@ -1,4 +1,4 @@
-# Hermes AI 多 Profile 团队配置 — 模型分配方案
+# Hermes DevTeam — 模型分配方案
 #
 # 策略：角色按职责分为两个 Tier，用户根据自己使用的模型自由配置
 # - reasoning（重型）：需要深度推理、复杂分析、高质量生成的角色
