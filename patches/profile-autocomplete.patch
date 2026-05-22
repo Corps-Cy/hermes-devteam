@@ -1,0 +1,94 @@
+# /switch 和 /profile 命令自动补丁
+#
+# 此补丁为 Hermes Agent CLI 的 commands.py 添加以下功能：
+# 1. Tab 补全：输入 /switch 或 /profile 后按 Tab 自动补全 profile 名称
+# 2. Ghost text：输入 /switch 或 /profile 后自动显示匹配的 profile 名
+# 3. 显示 Profile 角色：在补全列表中显示每个 profile 的角色标题（来自 SOUL.md 第一行）
+# 4. 标记当前 Profile：当前激活的 profile 后显示 * 标记
+#
+# 目标文件：hermes_cli/commands.py
+#
+# 应用方式：
+#   方式一（自动）：运行 ./apply-patches.sh
+#   方式二（手动）：cd ~/.hermes/hermes-agent && patch -p1 < this-file.patch
+#
+# 注意：此补丁基于 Hermes Agent 最新版 commands.py 编写。
+#       如果 commands.py 有较大改动，可能需要手动调整。
+
+diff --git a/hermes_cli/commands.py b/hermes_cli/commands.py
+--- a/hermes_cli/commands.py
++++ b/hermes_cli/commands.py
+@@ -1568,6 +1568,43 @@
+                 )
+         except Exception:
+             pass
++
++    @staticmethod
++    def _profile_completions(sub_text: str, sub_lower: str):
++        """Yield completions for /profile and /switch from installed profiles."""
++        try:
++            from hermes_cli.profiles import list_profiles, get_active_profile_name
++            from pathlib import Path as _Path
++
++            active = get_active_profile_name()
++            for p in sorted(list_profiles(), key=lambda p: p.name):
++                if p.name.startswith(sub_lower) and p.name != sub_lower:
++                    # Read SOUL.md first line as role title for meta
++                    title = ""
++                    soul_path = _Path(p.path) / "SOUL.md"
++                    if soul_path.is_file():
++                        try:
++                            with open(soul_path, "r", encoding="utf-8") as f:
++                                first_line = f.readline().strip().lstrip("# ").strip()
++                            title = first_line
++                        except Exception:
++                            pass
++                    # Build meta: show title if available, else description
++                    if title:
++                        meta = title[:50]
++                    elif p.description:
++                        meta = p.description[:50]
++                    else:
++                        meta = "profile"
++                    # Mark active profile
++                    if p.name == active:
++                        display = f"{p.name} *"
++                    else:
++                        display = p.name
++                    yield Completion(
++                        p.name,
++                        start_position=-len(sub_text),
++                        display=display,
++                        display_meta=meta,
++                    )
++        except Exception:
++            pass
+ 
+     @staticmethod
+     def _personality_completions(sub_text: str, sub_lower: str):
+
+@@ -1706,6 +1743,10 @@
+             # Dynamic completions for commands with runtime lists
+             if " " not in sub_text:
++                if base_cmd in ("/profile", "/switch"):
++                    yield from self._profile_completions(sub_text, sub_lower)
++                    return
+                 if base_cmd == "/model":
+                     yield from self._model_completions(sub_text, sub_lower)
+                     return
+
+@@ -1836,6 +1877,16 @@
+         # Dynamic completions for runtime lists
+         if " " not in sub_text:
++            if base_cmd in ("/profile", "/switch"):
++                try:
++                    from hermes_cli.profiles import list_profiles
++                    for p in sorted(list_profiles(), key=lambda p: p.name):
++                        if p.name.startswith(sub_lower) and p.name != sub_lower:
++                            return Suggestion(p.name[len(sub_text):])
++                except Exception:
++                    pass
++                return None
+             if base_cmd == "/model":
+                 try:
+                     from hermes_cli.model_switch import (

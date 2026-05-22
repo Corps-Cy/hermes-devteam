@@ -1,0 +1,36 @@
+# Hermes AI 多 Profile 团队配置 — 模型分配方案
+#
+# 策略：根据角色职责特点选择最优模型
+# - GLM-5.1（旗舰）：需要深度推理、复杂分析、高质量生成的角色
+# - GLM-5-Turbo（高速）：需要快速执行、工具调用、任务编排的角色
+#
+# 如需自定义，修改下方对应 profile 的 model 字段即可。
+
+models:
+  glm-5-1:
+    name: "GLM-5.1"
+    model_id: "glm-5.1"
+    description: "智谱旗舰模型，综合能力最强"
+    profiles:
+      - architect    # 技术架构师 — 深度架构设计需要强推理
+      - ceo          # 商业 CEO — 商业分析需要高智能
+      - coder        # 全栈工程师 — 代码实现需要深度理解
+      - designer     # UI/UX 设计师 — 设计创新需要创造力
+      - pm           # 产品经理 — 需求分析需要深度理解
+      - qa           # QA 审计师 — 安全审计需要严谨推理
+      - data         # 数据工程师 — 数据分析需要深度计算
+      - ml           # AI/ML 工程师 — AI 方案设计需要强推理
+
+  glm-5-turbo:
+    name: "GLM-5-Turbo"
+    model_id: "glm-5-turbo"
+    description: "智谱快速模型，Agent 优化，性价比高"
+    profiles:
+      - devops       # 运维工程师 — 执行部署指令为主
+      - orchestrator  # 项目指挥 — 任务编排和调度为主
+      - pmo          # 项目管理 — 流程驱动，模板化工作
+
+# 默认配置（所有 profile 共享）
+defaults:
+  provider: "zai"
+  base_url: "https://open.bigmodel.cn/api/coding/paas/v4"
