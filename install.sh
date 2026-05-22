@@ -13,6 +13,7 @@
 #   --apply-patches         安装后自动应用 /switch 自动补全补丁
 #   --skip-models           只安装角色定义（SOUL.md），不配置模型
 #   --dry-run               只显示将要执行的操作，不实际执行
+#   --uninstall             卸载所有已安装的 DevTeam Profile
 #   --help                  显示帮助信息
 # ============================================================================
 
@@ -35,16 +36,19 @@ BASE_URL=""
 APPLY_PATCHES=false
 SKIP_MODELS=false
 DRY_RUN=false
+UNINSTALL=false
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# ---- Tier 中的 Profile 列表 ----
-PROFILE_REASONING="architect ceo coder designer pm qa data ml"
-PROFILE_EXECUTION="devops orchestrator pmo"
+# ---- Tier 中的 Profile 列表（默认值，YAML 解析成功后会被覆盖）----
+DEFAULT_PROFILE_REASONING="architect ceo coder designer pm qa data ml"
+DEFAULT_PROFILE_EXECUTION="devops orchestrator pmo"
+PROFILE_REASONING="$DEFAULT_PROFILE_REASONING"
+PROFILE_EXECUTION="$DEFAULT_PROFILE_EXECUTION"
 ALL_PROFILES="$PROFILE_REASONING $PROFILE_EXECUTION"
 
 # ---- 帮助信息 ----
 show_help() {
-    echo -e "${BOLD}Hermes DevTeam — 安装脚本${NC}"
+    echo -e "${BOLD}Hermes DevTeam — 安装/卸载脚本${NC}"
     echo ""
     echo "用法: $0 [选项]"
     echo ""
@@ -56,6 +60,7 @@ show_help() {
     echo "  --apply-patches         安装后自动应用 /switch 自动补全补丁"
     echo "  --skip-models           只安装角色定义，不配置模型"
     echo "  --dry-run               只显示将要执行的操作，不实际执行"
+    echo "  --uninstall             卸载所有已安装的 DevTeam Profile"
     echo "  --help                  显示帮助信息"
     echo ""
     echo "模型 Tier 说明:"
@@ -69,6 +74,7 @@ show_help() {
     echo "  $0 --provider openrouter --model-heavy anthropic/claude-sonnet-4"
     echo "  $0 --apply-patches                                       # 启用 /switch 补全"
     echo "  $0 --dry-run                                             # 预览操作"
+    echo "  $0 --uninstall                                           # 卸载所有 Profile"
 }
 
 # ---- 日志函数 ----
@@ -87,6 +93,7 @@ while [[ $# -gt 0 ]]; do
         --apply-patches)  APPLY_PATCHES=true; shift ;;
         --skip-models)    SKIP_MODELS=true; shift ;;
         --dry-run)        DRY_RUN=true; shift ;;
+        --uninstall)      UNINSTALL=true; shift ;;
         --help|-h)        show_help; exit 0 ;;
         *) error "未知参数: $1"; show_help; exit 1 ;;
     esac
@@ -127,7 +134,79 @@ read_yaml_models() {
     done < "$yaml"
 }
 
+# ---- 从 model-assignments.yaml 读取 tier profile 列表 ----
+read_yaml_tiers() {
+    local yaml="$SCRIPT_DIR/model-assignments.yaml"
+    if [[ ! -f "$yaml" ]]; then
+        warn "未找到 model-assignments.yaml，使用默认 tier 列表"
+        return
+    fi
+
+    local reasoning_profiles=()
+    local execution_profiles=()
+    local current_tier=""
+
+    while IFS= read -r line; do
+        # 跳过注释和空行
+        [[ "$line" =~ ^[[:space:]]*# ]] && continue
+        [[ -z "${line// }" ]] && continue
+
+        # 匹配 tiers.reasoning.profiles: 或 tiers.execution.profiles:
+        if [[ "$line" =~ ^[[:space:]]*tiers: ]]; then
+            continue
+        fi
+        if [[ "$line" =~ ^[[:space:]]*reasoning: ]]; then
+            current_tier="reasoning"
+            continue
+        fi
+        if [[ "$line" =~ ^[[:space:]]*execution: ]]; then
+            current_tier="execution"
+            continue
+        fi
+        # 匹配 profiles: 子 key
+        if [[ "$line" =~ ^[[:space:]]*profiles: ]]; then
+            continue
+        fi
+        # 匹配 description: 跳过
+        if [[ "$line" =~ ^[[:space:]]*description: ]]; then
+            continue
+        fi
+        # 遇到其他顶层 key（如 models:），结束 tier 解析
+        if [[ "$line" =~ ^[a-z] && ! "$line" =~ ^[[:space:]] ]]; then
+            current_tier=""
+        fi
+
+        # 匹配 profile 条目（以 - 开头）
+        if [[ "$current_tier" != "" && "$line" =~ ^[[:space:]]*-[[:space:]]*([a-zA-Z0-9_-]+) ]]; then
+            local profile_name="${BASH_REMATCH[1]}"
+            if [[ "$current_tier" == "reasoning" ]]; then
+                reasoning_profiles+=("$profile_name")
+            elif [[ "$current_tier" == "execution" ]]; then
+                execution_profiles+=("$profile_name")
+            fi
+        fi
+    done < "$yaml"
+
+    # 如果解析到了有效的 profile 列表，覆盖默认值
+    if [[ ${#reasoning_profiles[@]} -gt 0 ]]; then
+        PROFILE_REASONING="${reasoning_profiles[*]}"
+        info "从 YAML 读取 Reasoning Tier: $PROFILE_REASONING"
+    else
+        warn "YAML 中未找到 reasoning profiles，使用默认列表"
+    fi
+
+    if [[ ${#execution_profiles[@]} -gt 0 ]]; then
+        PROFILE_EXECUTION="${execution_profiles[*]}"
+        info "从 YAML 读取 Execution Tier: $PROFILE_EXECUTION"
+    else
+        warn "YAML 中未找到 execution profiles，使用默认列表"
+    fi
+
+    ALL_PROFILES="$PROFILE_REASONING $PROFILE_EXECUTION"
+}
+
 read_yaml_models
+read_yaml_tiers
 
 # ---- 前置检查 ----
 check_prerequisites() {
@@ -279,6 +358,91 @@ install_profiles() {
     done
 }
 
+# ---- 卸载所有 DevTeam Profile ----
+uninstall_profiles() {
+    echo ""
+    echo -e "${BOLD}${CYAN}═══════════════════════════════════════════════════${NC}"
+    echo -e "${BOLD}${CYAN}        Hermes DevTeam — 卸载${NC}"
+    echo -e "${BOLD}${CYAN}═══════════════════════════════════════════════════${NC}"
+    echo ""
+    $DRY_RUN && warn "模式: 预览（不会实际执行）"
+    echo ""
+
+    local profiles_dir
+    profiles_dir="$(get_hermes_profiles_dir)"
+    local removed=0
+    local skipped=0
+    local failed=0
+
+    for profile in $ALL_PROFILES; do
+        local profile_path="$profiles_dir/$profile"
+        local soul_path="$profile_path/SOUL.md"
+        local source_soul="$SCRIPT_DIR/profiles/$profile/SOUL.md"
+
+        # 检查 profile 目录是否存在
+        if [[ ! -d "$profile_path" ]]; then
+            info "Profile '$profile' 不存在，跳过"
+            skipped=$((skipped + 1))
+            continue
+        fi
+
+        # 安全检查：确认是 DevTeam 创建的 profile（对比 SOUL.md）
+        if [[ -f "$soul_path" && -f "$source_soul" ]]; then
+            # 比较文件内容，确认是我们管理的 profile
+            if ! diff -q "$soul_path" "$source_soul" &> /dev/null; then
+                # 内容不同，检查第一行（角色标题）是否匹配
+                local installed_first_line source_first_line
+                installed_first_line=$(head -1 "$soul_path" 2>/dev/null || echo "")
+                source_first_line=$(head -1 "$source_soul" 2>/dev/null || echo "")
+                if [[ "$installed_first_line" != "$source_first_line" ]]; then
+                    warn "Profile '$profile' 的 SOUL.md 不是 DevTeam 管理的版本，跳过删除"
+                    skipped=$((skipped + 1))
+                    continue
+                fi
+            fi
+        else
+            # SOUL.md 不存在或源文件不存在，无法验证，跳过
+            warn "Profile '$profile' 无法验证来源，跳过删除"
+            skipped=$((skipped + 1))
+            continue
+        fi
+
+        # 执行删除
+        if $DRY_RUN; then
+            info "[dry-run] 将删除 Profile: $profile ($profile_path)"
+            removed=$((removed + 1))
+        else
+            # 尝试用 hermes 命令删除
+            if hermes profile delete "$profile" 2>/dev/null; then
+                info "Profile '$profile' 已删除（hermes 命令）"
+                removed=$((removed + 1))
+            else
+                # hermes 命令失败，手动删除目录
+                warn "hermes profile delete '$profile' 失败，尝试手动删除..."
+                if rm -rf "$profile_path"; then
+                    info "Profile '$profile' 已删除（手动）"
+                    removed=$((removed + 1))
+                else
+                    error "Profile '$profile' 删除失败"
+                    failed=$((failed + 1))
+                fi
+            fi
+        fi
+    done
+
+    echo ""
+    echo -e "${BOLD}${GREEN}卸载完成！${NC}"
+    echo "  已删除: $removed 个"
+    [[ $skipped -gt 0 ]] && echo "  已跳过: $skipped 个"
+    [[ $failed -gt 0 ]] && echo "  失败: $failed 个"
+    echo ""
+    if $DRY_RUN; then
+        info "以上为预览结果，实际未执行任何删除操作"
+    else
+        info "提示: 运行 ./install.sh 可重新安装"
+    fi
+}
+
 # ---- 应用补丁 ----
 apply_patches() {
     if ! $APPLY_PATCHES; then
@@ -357,10 +521,16 @@ ${MODEL_FAST:+→ $MODEL_FAST}"
 
 # ---- 主流程 ----
 main() {
-    check_prerequisites
-    install_profiles
-    apply_patches
-    print_summary
+    if $UNINSTALL; then
+        # 卸载模式不需要 hermes 前置检查（但需要 profile 目录存在）
+        step "卸载模式..."
+        uninstall_profiles
+    else
+        check_prerequisites
+        install_profiles
+        apply_patches
+        print_summary
+    fi
 }
 
 main "$@"

@@ -2,6 +2,9 @@
 # ============================================================================
 # Hermes Agent /switch 自动补全 — 补丁应用脚本
 # ============================================================================
+# 适用于 Hermes Agent >= 0.x（基于 commands.py 的 patch 注入）
+# 如果 Hermes Agent 更新导致补丁失效，请提交 Issue
+# ============================================================================
 # 功能：为 Hermes Agent CLI 添加 /switch 和 /profile 命令的 Tab 自动补全
 #       和 Ghost Text 提示功能。
 #
@@ -20,6 +23,15 @@ NC='\033[0m'
 info()  { echo -e "${GREEN}[INFO]${NC} $*"; }
 warn()  { echo -e "${YELLOW}[WARN]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
+
+# 版本检测
+HERMES_VERSION=""
+if command -v hermes &> /dev/null; then
+    HERMES_VERSION="$(hermes --version 2>/dev/null || echo "未知版本")"
+    info "Hermes Agent 版本: $HERMES_VERSION"
+else
+    warn "未检测到 hermes 命令"
+fi
 
 # 定位 Hermes Agent 安装目录
 HERMES_DIR=""

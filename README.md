@@ -26,6 +26,18 @@ hermes -p architect     # 切到架构师讨论系统设计
 
 ---
 
+## Demo
+
+> 将来可以在这里展示安装和使用过程的截图/GIF
+
+<br/>
+
+<p align="center">
+  <img src="docs/demo.svg" alt="Hermes DevTeam Demo" width="600">
+</p>
+
+---
+
 ## 快速开始
 
 ### 前置条件
@@ -206,9 +218,11 @@ done
 ```
 hermes-devteam/
 ├── README.md                         # 本文件
+├── CHANGELOG.md                    # 更新日志
 ├── LICENSE                           # MIT
 ├── install.sh                        # 一键安装脚本（支持多种参数）
 ├── model-assignments.yaml            # Tier 分层定义 + 可选模型配置
+├── docs/                           # 文档和截图
 ├── profiles/
 │   ├── architect/  {SOUL.md, profile.yaml}
 │   ├── ceo/         {SOUL.md, profile.yaml}
